@@ -14,11 +14,48 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
 using namespace physx;
 using namespace emscripten;
 
 #define __LIB_VERSION__ 100
+
+class IPvdTransport {
+public:
+  virtual bool connect() = 0;
+  virtual void disconnect() = 0;
+  virtual bool isConnected() = 0;
+  virtual bool write(const uint8_t *inBytes, uint32_t inLength) = 0;
+  virtual ~IPvdTransport() {}
+};
+
+struct IPvdTransportWrapper : public wrapper<IPvdTransport> {
+  EMSCRIPTEN_WRAPPER(IPvdTransportWrapper)
+  bool connect() { return call<bool>("connect"); }
+  void disconnect() { call<void>("disconnect"); }
+  bool isConnected() { return call<bool>("isConnected"); }
+  bool write(const uint8_t *inBytes, uint32_t inLength) {
+    return call<bool>("write", int(inBytes), int(inLength));
+  }
+};
+
+class ccPvdTransport : public PxPvdTransport {
+public:
+  ccPvdTransport(IPvdTransport *pvdTransport) : _mPvdTransport(pvdTransport) {}
+  virtual void unlock() override {}
+  virtual void flush() override {}
+  virtual void release() override {}
+  virtual PxPvdTransport &lock() override { return *this; }
+  virtual uint64_t getWrittenDataSize() override { return 0; }
+  virtual bool connect() override { return _mPvdTransport->connect(); }
+  virtual void disconnect() override { _mPvdTransport->disconnect(); }
+  virtual bool isConnected() override { return _mPvdTransport->isConnected(); }
+  virtual bool write(const uint8_t *inBytes, uint32_t inLength) override {
+    return _mPvdTransport->write(inBytes, inLength);
+  }
+
+protected:
+  IPvdTransport *_mPvdTransport;
+};
 
 struct PxRaycastCallbackWrapper : public wrapper<PxRaycastCallback> {
   EMSCRIPTEN_WRAPPER(PxRaycastCallbackWrapper)
@@ -77,8 +114,8 @@ struct PxQueryFilterCallbackWrapper : public wrapper<PxQueryFilterCallback> {
   }
 };
 
-bool gContactPointsNeedClear = false;
-std::vector<PxContactPairPoint> gContactPoints;
+static bool gContactPointsNeedClear = false;
+static std::vector<PxContactPairPoint> gContactPoints;
 std::vector<PxContactPairPoint> getGContacts() { return gContactPoints; }
 struct PxSimulationEventCallbackWrapper
     : public wrapper<PxSimulationEventCallback> {
@@ -726,7 +763,11 @@ EMSCRIPTEN_BINDINGS(physx) {
       .function("createRigidStatic", &PxPhysics::createRigidStatic,
                 allow_raw_pointers());
 
-  class_<PxPvd>("PxPvd");
+  class_<PxPvd>("PxPvd").function(
+      "connect",
+      optional_override([](PxPvd &pvd, PxPvdTransport &transport, PxU8 flags) {
+        return pvd.connect(transport, PxPvdInstrumentationFlags{flags});
+      }));
 
   class_<PxShapeFlags>("PxShapeFlags")
       .constructor<int>()
@@ -1180,6 +1221,14 @@ EMSCRIPTEN_BINDINGS(physx) {
   //     .value("eCOLLISION_UP", PxControllerCollisionFlag::Enum::eCOLLISION_UP)
   //     .value("eCOLLISION_DOWN",
   //     PxControllerCollisionFlag::Enum::eCOLLISION_DOWN);
+
+  // PVD
+  class_<PxPvdTransport>("PxPvdTransport");
+  class_<ccPvdTransport, base<PxPvdTransport>>("ccPvdTransport")
+      .constructor<IPvdTransport *>();
+
+  class_<IPvdTransport>("IPvdTransport")
+      .allow_subclass<IPvdTransportWrapper>("IPvdTransportWrapper");
 }
 
 namespace emscripten {
