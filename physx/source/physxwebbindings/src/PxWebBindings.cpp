@@ -1,4 +1,5 @@
 #include "PxPhysicsAPI.h"
+#include "pvd/PxPvd.h"
 #include <PsSocket.h>
 #include <arpa/inet.h>
 #include <chrono>
@@ -767,7 +768,9 @@ EMSCRIPTEN_BINDINGS(physx) {
       "connect",
       optional_override([](PxPvd &pvd, PxPvdTransport &transport, PxU8 flags) {
         return pvd.connect(transport, PxPvdInstrumentationFlags{flags});
-      }));
+      }))
+      .function("disconnect", &PxPvd::disconnect)
+      .function("release", &PxPvd::release);
 
   class_<PxShapeFlags>("PxShapeFlags")
       .constructor<int>()
