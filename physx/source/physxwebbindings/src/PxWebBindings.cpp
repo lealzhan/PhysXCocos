@@ -479,8 +479,8 @@ EMSCRIPTEN_BINDINGS(physx) {
       .field("z", &PxQuat::z)
       .field("w", &PxQuat::w);
   value_object<PxTransform>("PxTransform")
-      .field("translation", &PxTransform::p)
-      .field("rotation", &PxTransform::q);
+      .field("p", &PxTransform::p)
+      .field("q", &PxTransform::q);
   value_object<PxExtendedVec3>("PxExtendedVec3")
       .field("x", &PxExtendedVec3::x)
       .field("y", &PxExtendedVec3::y)
