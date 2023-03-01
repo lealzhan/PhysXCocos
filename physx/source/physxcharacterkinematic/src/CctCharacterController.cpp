@@ -52,7 +52,7 @@
 #ifdef DEBUG_MTD
 	#include <stdio.h>
 #endif
-
+#include <stdio.h>
 #define	MAX_ITER	10
 
 using namespace physx;
@@ -164,6 +164,7 @@ static PX_INLINE void collisionResponse(PxExtendedVec3& targetPosition, const Px
 
 static PX_INLINE void relocateBox(PxBoxGeometry& boxGeom, PxTransform& pose, const PxExtendedVec3& center, const PxVec3& extents, const PxExtendedVec3& origin, const PxQuat& quatFromUp)
 {
+	//printf("origin0 %f %f %f\n", double(origin.x), double(origin.y), double(origin.z));
 	boxGeom.halfExtents = extents;
 
 	pose.p.x = float(center.x - origin.x);
@@ -190,13 +191,20 @@ static PX_INLINE void relocateCapsule(
 	PxCapsuleGeometry& capsuleGeom, PxTransform& pose, const SweptCapsule* sc,
 	const PxQuat& quatFromUp,
 	const PxExtendedVec3& center, const PxExtendedVec3& origin)
+	//PxExtendedVec3 center, PxExtendedVec3 origin)
 {
+	//printf("origin0 %f %f %f\n", double(origin.x), double(origin.y), double(origin.z));
+
 	capsuleGeom.radius = sc->mRadius;
 	capsuleGeom.halfHeight = 0.5f * sc->mHeight;
 
 	pose.p.x = float(center.x - origin.x);
 	pose.p.y = float(center.y - origin.y);
+	//printf("%f - %f = %f, %f\n", center.y, origin.y, double(center.y - origin.y), (center.y - origin.y));
+	//printf("%f  %lf  %f  %lf\n", origin.y, origin.y, double(origin.y), double(origin.y));
 	pose.p.z = float(center.z - origin.z);
+
+	//printf("origin1 %f %f %f\n", double(origin.x), double(origin.y), double(origin.z));
 
 	pose.q = quatFromUp;
 }
@@ -224,6 +232,8 @@ static PX_INLINE void relocateCapsule(PxCapsuleGeometry& capsuleGeom, PxTransfor
 
 static bool SweepBoxUserBox(const SweepTest* test, const SweptVolume* volume, const TouchedGeom* geom, const PxExtendedVec3& center, const PxVec3& dir, SweptContact& impact)
 {
+	//		printf("SweepBoxUserBox START\n");
+
 	PX_ASSERT(volume->getType()==SweptVolumeType::eBOX);
 	PX_ASSERT(geom->mType==TouchedGeomType::eUSER_BOX);
 	const SweptBox* SB = static_cast<const SweptBox*>(volume);
@@ -255,6 +265,8 @@ static bool SweepBoxUserBox(const SweepTest* test, const SweptVolume* volume, co
 
 static bool SweepBoxUserCapsule(const SweepTest* test, const SweptVolume* volume, const TouchedGeom* geom, const PxExtendedVec3& center, const PxVec3& dir, SweptContact& impact)
 {
+	//	printf("SweepBoxUserCapsule START\n");
+
 	PX_ASSERT(volume->getType()==SweptVolumeType::eBOX);
 	PX_ASSERT(geom->mType==TouchedGeomType::eUSER_CAPSULE);
 	const SweptBox* SB = static_cast<const SweptBox*>(volume);
@@ -308,6 +320,9 @@ static bool sweepVolumeVsMesh(	const SweepTest* sweepTest, const TouchedMesh* to
 	{
 		if(sweepHit.distance >= impact.mDistance)
 			return false;
+		
+		//printf("sweepHit.position %f %f %f\n", double(sweepHit.position.x), double(sweepHit.position.y), double(sweepHit.position.z));
+		//printf("touchedMesh->mOffset %f %f %f\n", double(touchedMesh->mOffset.x), double(touchedMesh->mOffset.y), double(touchedMesh->mOffset.z));
 
 		impact.mDistance	= sweepHit.distance;
 		impact.mWorldNormal	= sweepHit.normal;
@@ -328,6 +343,8 @@ static bool sweepVolumeVsMesh(	const SweepTest* sweepTest, const TouchedMesh* to
 
 static bool SweepBoxMesh(const SweepTest* sweep_test, const SweptVolume* volume, const TouchedGeom* geom, const PxExtendedVec3& center, const PxVec3& dir, SweptContact& impact)
 {
+	//printf("SweepBoxMesh START\n");
+
 	PX_ASSERT(volume->getType()==SweptVolumeType::eBOX);
 	PX_ASSERT(geom->mType==TouchedGeomType::eMESH);
 	const SweptBox* SB = static_cast<const SweptBox*>(volume);
@@ -348,6 +365,9 @@ static bool SweepBoxMesh(const SweepTest* sweep_test, const SweptVolume* volume,
 	PxBoxGeometry boxGeom;
 	boxGeom.halfExtents = SB->mExtents;
 	PxTransform boxPose(PxVec3(float(center.x - TM->mOffset.x), float(center.y - TM->mOffset.y), float(center.z - TM->mOffset.z)), sweep_test->mUserParams.mQuatFromUp);  // Precompute
+	//printf("boxPose p %f %f %f\n", double(boxPose.p.x), double(boxPose.p.y), double(boxPose.p.z));
+	//printf("boxPose q x %f y %f z %f w %f\n", double(boxPose.q.x), double(boxPose.q.y),
+	// double(boxPose.q.z), double(boxPose.q.w));
 	return sweepVolumeVsMesh(sweep_test, TM, impact, dir, boxGeom, boxPose, nbTris, T, CachedIndex);
 }
 
@@ -355,6 +375,7 @@ static bool SweepCapsuleMesh(
 	const SweepTest* sweep_test, const SweptVolume* volume, const TouchedGeom* geom,
 	const PxExtendedVec3& center, const PxVec3& dir, SweptContact& impact)
 {
+	//printf("SweepCapsuleMesh START\n");
 	PX_ASSERT(volume->getType()==SweptVolumeType::eCAPSULE);
 	PX_ASSERT(geom->mType==TouchedGeomType::eMESH);
 	const SweptCapsule* SC = static_cast<const SweptCapsule*>(volume);
@@ -373,15 +394,23 @@ static bool SweepCapsuleMesh(
 	if(CachedIndex>=nbTris)
 		CachedIndex=0;
 
+	//printf("center %f %f %f\n", double(center.x), double(center.y), double(center.z));
+	//printf("TM->mOffset %f %f %f\n", double(TM->mOffset.x), double(TM->mOffset.y), double(TM->mOffset.z));
+
 	PxCapsuleGeometry capsuleGeom;
 	PxTransform capsulePose;
 	relocateCapsule(capsuleGeom, capsulePose, SC, sweep_test->mUserParams.mQuatFromUp, center, TM->mOffset);
 
+	//printf("capsulePose p %f %f %f\n", double(capsulePose.p.x), double(capsulePose.p.y), double(capsulePose.p.z));
+	//printf("capsulePose q x %f y %f z %f w %f\n", double(capsulePose.q.x), double(capsulePose.q.y),
+	// double(capsulePose.q.z), double(capsulePose.q.w));
 	return sweepVolumeVsMesh(sweep_test, TM, impact, dir, capsuleGeom, capsulePose, nbTris, T, CachedIndex);
 }
 
 static bool SweepBoxBox(const SweepTest* test, const SweptVolume* volume, const TouchedGeom* geom, const PxExtendedVec3& center, const PxVec3& dir, SweptContact& impact)
 {
+	printf("SweepBoxBox START\n");
+
 	PX_ASSERT(volume->getType()==SweptVolumeType::eBOX);
 	PX_ASSERT(geom->mType==TouchedGeomType::eBOX);
 	const SweptBox* SB = static_cast<const SweptBox*>(volume);
@@ -505,6 +534,8 @@ static bool SweepBoxCapsule(const SweepTest* test, const SweptVolume* volume, co
 
 static bool SweepCapsuleBox(const SweepTest* test, const SweptVolume* volume, const TouchedGeom* geom, const PxExtendedVec3& center, const PxVec3& dir, SweptContact& impact)
 {
+	printf("SweepCapsuleBox START\n");
+
 	PX_ASSERT(volume->getType()==SweptVolumeType::eCAPSULE);
 	PX_ASSERT(geom->mType==TouchedGeomType::eBOX);
 	const SweptCapsule* SC = static_cast<const SweptCapsule*>(volume);
@@ -521,8 +552,9 @@ static bool SweepCapsuleBox(const SweepTest* test, const SweptVolume* volume, co
 
 	// The box and capsule coordinates are relative to the center of the cached bounding box
 	PxSweepHit sweepHit;
-	if(!PxGeometryQuery::sweep(dir, impact.mDistance, capsuleGeom, capsulePose, boxGeom, boxPose, sweepHit, getSweepHitFlags(test->mUserParams)))
+	if(!PxGeometryQuery::sweep(dir, impact.mDistance, capsuleGeom, capsulePose, boxGeom, boxPose, sweepHit, getSweepHitFlags(test->mUserParams))){
 		return false;
+	}
 
 	if(sweepHit.distance >= impact.mDistance)
 		return false;
@@ -730,16 +762,22 @@ static const TouchedGeom* CollideGeoms(
 	impact.mInternalIndex	= PX_INVALID_U32;
 	impact.mTriangleIndex	= PX_INVALID_U32;
 	impact.mGeom			= NULL;
+	//printf("CharacterController.doSweepTest CollideGeoms:\n");
 
 	const PxU32* Data = geom_stream.begin();
 	const PxU32* Last = geom_stream.end();
+	int numb = 0;
 	while(Data!=Last)
 	{
+		//printf("CharacterController.doSweepTest CollideGeoms it %d\n", numb);
+		numb++;
 		const TouchedGeom* CurrentGeom = reinterpret_cast<const TouchedGeom*>(Data);
 
+		//printf("CharacterController.doSweepTest CollideGeoms this-type %d other-type %d\n", volume.getType(), CurrentGeom->mType);
 		SweepFunc ST = gSweepMap[volume.getType()][CurrentGeom->mType];
 		if(ST)
 		{
+			//printf("CharacterController.doSweepTest CollideGeoms start SweepFunc\n");
 			SweptContact C;
 			C.mDistance			= impact.mDistance;	// Initialize with current best distance
 			C.mInternalIndex	= PX_INVALID_U32;
@@ -775,6 +813,8 @@ static const TouchedGeom* CollideGeoms(
 				}*/
 				else if(C.mDistance<impact.mDistance)
 				{
+					//printf("CharacterController.doSweepTest CollideGeoms: C.mDistance %f <impact.mDistance %f\n",
+					 //(double)C.mDistance, (double)impact.mDistance);
 					impact = C;
 					impact.mGeom = const_cast<TouchedGeom*>(CurrentGeom);
 					if(C.mDistance <= 0.0f)	// there is no point testing for closer hits
@@ -787,6 +827,7 @@ static const TouchedGeom* CollideGeoms(
 		ptr += GeomSizes[CurrentGeom->mType];
 		Data = reinterpret_cast<const PxU32*>(ptr);
 	}
+	//printf("CharacterController.doSweepTest CollideGeoms END\n");
 	return impact.mGeom;
 }
 
@@ -1231,7 +1272,8 @@ void SweepTest::updateTouchedGeoms(	const InternalCBData_FindTouchedGeom* userDa
 	// If the input box is inside the cached box, nothing to do
 	if(gUsePartialUpdates && !sceneHasChanged && worldTemporalBox.isInside(mCacheBounds))
 	{
-		//printf("CACHEIN%d\n", mFirstUpdate);
+		//printf("CharacterController.moveCharacter Initial volume sceneHasChanged true\n");
+		//printf("CACHEIN mFirstUpdate\n");
 		if(mFlags & STF_FIRST_UPDATE)
 		{
 			mFlags &= ~STF_FIRST_UPDATE;
@@ -1255,6 +1297,7 @@ void SweepTest::updateTouchedGeoms(	const InternalCBData_FindTouchedGeom* userDa
 	}
 	else
 	{
+		//printf("CharacterController.moveCharacter Initial volume sceneHasChanged false\n");
 		//printf("CACHEOUTNS=%d\n", mNbCachedStatic);
 		newCachedBox = true;
 
@@ -1302,6 +1345,7 @@ void SweepTest::updateTouchedGeoms(	const InternalCBData_FindTouchedGeom* userDa
 		if(filters.mFilterFlags & PxQueryFlag::eSTATIC)
 			filter.mStaticShapes	= true;
 		filter.mDynamicShapes	= false;
+		//printf("CharacterController.moveCharacter Initial volume query filter.mStaticShapes %d\n", filter.mStaticShapes);
 		findTouchedGeometry(userData, mCacheBounds, mWorldTriangles, mTriangleIndices, mGeomStream, filter, mUserParams, mNbTessellation);
 
 		mNbCachedStatic = mGeomStream.size();
@@ -1319,6 +1363,9 @@ void SweepTest::updateTouchedGeoms(	const InternalCBData_FindTouchedGeom* userDa
 
 		mFlags &= ~STF_FIRST_UPDATE;
 		//printf("CACHEOUTNSDONE=%d\n", mNbCachedStatic);
+		//printf("CharacterController.moveCharacter Initial volume query mGeomStream size %d\n", mGeomStream.size());
+		//printf("CharacterController.moveCharacter Initial volume query mNbCachedStatic %d\n", mNbCachedStatic);
+		//printf("CharacterController.moveCharacter Initial volume query mNbCachedT %d\n", mNbCachedT);
 	}
 
 	if(mRenderBuffer)
@@ -1356,6 +1403,8 @@ bool SweepTest::doSweepTest(const InternalCBData_FindTouchedGeom* userData,
 	// and this function is called for each of them, it actually happens quite often.
 	if(direction.isZero())
 		return false;
+	
+	//printf("CharacterController.doSweepTest dir %f %f %f\n", (double)direction.x, (double)direction.y, (double)direction.z);
 
 	PX_PROFILE_ZONE("CharacterController.doSweepTest", contextID);
 	PX_UNUSED(contextID);
@@ -1401,6 +1450,8 @@ bool SweepTest::doSweepTest(const InternalCBData_FindTouchedGeom* userData,
 		if((currentDirection.dot(direction)) <= 0.0f)
 			break;
 
+		//printf("CharacterController.doSweepTest currentDirection %lf %lf %lf\n", (double)currentDirection.x, (double)currentDirection.y, (double)currentDirection.z);
+
 		// From this point, we're going to update the position at least once
 		hasMoved = true;
 
@@ -1408,12 +1459,17 @@ bool SweepTest::doSweepTest(const InternalCBData_FindTouchedGeom* userData,
 		SweptContact C;
 		C.mDistance = Length + mUserParams.mContactOffset;
 
+		//printf("CharacterController.doSweepTest CollideGeoms START: mGeomStream size %d\n", mGeomStream.size());
 		if(!CollideGeoms(this, swept_volume, mGeomStream, currentPosition, currentDirection, C, !mUserParams.mOverlapRecovery))
 		{
+			//printf("CharacterController.doSweepTest CollideGeoms no collide found\n");
+
 			// no collision found => move to desired position
 			currentPosition = targetOrientation;
 			break;
 		}
+		
+		//printf("CharacterController.doSweepTest CollideGeoms found collide!!, continue\n");
 
 		PX_ASSERT(C.mGeom);	// If we reach this point, we must have touched a geom
 
@@ -1524,6 +1580,7 @@ bool SweepTest::doSweepTest(const InternalCBData_FindTouchedGeom* userData,
 				//		  3. should we treat no kinematics the same as statics.
 				if((touchedActor->getConcreteType() == PxConcreteType::eRIGID_STATIC) && (C.mInternalIndex!=PX_INVALID_U32))
 				{
+					//printf("CharacterController.doSweepTest  We touched a normal object \n");
 					mFlags |= STF_VALIDATE_TRIANGLE_DOWN;
 					const PxTriangle& touchedTri = mWorldTriangles.getTriangle(C.mInternalIndex);
 					const PxVec3& upDirection = mUserParams.mUpDirection;
@@ -1571,6 +1628,7 @@ bool SweepTest::doSweepTest(const InternalCBData_FindTouchedGeom* userData,
 			if(sweepPass!=SWEEP_PASS_SENSOR)
 //			if(mValidateCallback)
 			{
+				//printf("CharacterController. shapeHitCallback\n");
 				const PxU32 behaviorFlags = shapeHitCallback(userHitData, C, currentDirection, Length);
 				stopSliding = (behaviorFlags & PxControllerBehaviorFlag::eCCT_SLIDE)==0;		// (*)
 			}
@@ -1651,6 +1709,7 @@ PxControllerCollisionFlags SweepTest::moveCharacter(
 					const PxShape*& touchedShape,
 					PxU64 contextID)
 {
+	//printf("CharacterController.moveCharacter\n");
 	PX_PROFILE_ZONE("CharacterController.moveCharacter", contextID);
 	PX_UNUSED(contextID);
 
@@ -1739,15 +1798,18 @@ PxControllerCollisionFlags SweepTest::moveCharacter(
 	// that this initial query will contain all the motion we need, and thus subsequent queries
 	// will be skipped.
 	{
+		//printf("CharacterController.moveCharacter Initial volume query \n");
 		PxExtendedBounds3 temporalBox;
 		volume.computeTemporalBox(*this, temporalBox, volume.mCenter, direction);
 
 		// Gather touched geoms
 		updateTouchedGeoms(userData, userObstacles, temporalBox, filters, SideVector);
+		
+		//printf("CharacterController.moveCharacter Initial volume query mGeomStream size %d\n", mGeomStream.size());
 	}
 
 	// ==========[ UP PASS ]===========================
-
+	//printf("CharacterController.moveCharacter UP PASS\n");
 	mCachedTriIndexIndex = 0;
 	const bool performUpPass = true;
 	PxU32 NbCollisions=0;
@@ -1833,6 +1895,7 @@ PxControllerCollisionFlags SweepTest::moveCharacter(
 	}
 
 	// ==========[ DOWN PASS ]===========================
+	//printf("CharacterController.moveCharacter DAWN PASS\n");
 
 	mCachedTriIndexIndex = 2;
 	const bool PerformDownPass = true;
@@ -1857,6 +1920,7 @@ PxControllerCollisionFlags SweepTest::moveCharacter(
 		{
 			if(NbCollisions)
 			{
+				//printf("CharacterController.DOWN PASS NbCollisions %d\n", NbCollisions);
 				if(dir_dot_up<=0.0f)	// PT: fix attempt
 					CollisionFlags |= PxControllerCollisionFlag::eCOLLISION_DOWN;
 
@@ -1877,7 +1941,7 @@ PxControllerCollisionFlags SweepTest::moveCharacter(
 							mFlags |= STF_HIT_NON_WALKABLE;
 							if(!(mFlags & STF_WALK_EXPERIMENT))
 								return CollisionFlags;
-	//						printf("Contrained\n");
+							//printf("Contrained\n");
 						}
 					}
 					//~constrainedClimbingMode

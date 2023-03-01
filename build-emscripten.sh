@@ -14,25 +14,25 @@ echo "|||  COMPILE |||"
 cd compiler/emscripten-js-$mode
 ninja
 
-echo "--------|||  BUILD WASM  |||--------"
+# echo "--------|||  BUILD WASM  |||--------"
 
-cd $base_dir
+# cd $base_dir
 
-echo "|||  GENERATE |||"
-cd physx/
-./generate_projects.bat emscripten-wasm
+# echo "|||  GENERATE |||"
+# cd physx/
+# ./generate_projects.bat emscripten-wasm
 
-echo "|||  COMPILE |||"
-cd compiler/emscripten-wasm-$mode
-ninja
+# echo "|||  COMPILE |||"
+# cd compiler/emscripten-wasm-$mode
+# ninja
 
 echo "|||  COPY  |||"
 
 cd $base_dir
 mkdir -p $base_dir/builds
 cp $base_dir/physx/bin/emscripten/$mode/physx.$mode.asm.js $base_dir/builds/physx.$mode.asm.js
-cp $base_dir/physx/bin/emscripten/$mode/physx.$mode.wasm.js $base_dir/builds/physx.$mode.wasm.js
-cp $base_dir/physx/bin/emscripten/$mode/physx.$mode.wasm.wasm $base_dir/builds/physx.$mode.wasm.wasm
+# cp $base_dir/physx/bin/emscripten/$mode/physx.$mode.wasm.js $base_dir/builds/physx.$mode.wasm.js
+# cp $base_dir/physx/bin/emscripten/$mode/physx.$mode.wasm.wasm $base_dir/builds/physx.$mode.wasm.wasm
 
 echo "|||  FINISH  |||"
 

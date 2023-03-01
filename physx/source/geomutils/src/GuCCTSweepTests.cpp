@@ -40,6 +40,7 @@
 #include "GuSweepTriangleUtils.h"
 #include "GuInternal.h"
 #include "PsVecMath.h"
+#include <stdio.h>
 
 using namespace physx;
 using namespace Gu;
@@ -56,7 +57,7 @@ bool sweepCapsule_BoxGeom_Precise(GU_CAPSULE_SWEEP_FUNC_PARAMS)
 	PX_UNUSED(inflation);
 	PX_UNUSED(capsulePose_);
 	PX_UNUSED(capsuleGeom_);
-
+	printf("sweepCapsule_BoxGeom_Precise\n");
 	const PxBoxGeometry& boxGeom = static_cast<const PxBoxGeometry&>(geom);
 
 	if (lss.p0 == lss.p1)  // The capsule is actually a sphere
@@ -87,7 +88,7 @@ bool sweepCapsule_BoxGeom_Precise(GU_CAPSULE_SWEEP_FUNC_PARAMS)
 	{
 		if(!sweepCapsuleBox(lss, pose, boxGeom.halfExtents, unitDir, distance, sweepHit.position, sweepHit.distance, sweepHit.normal, hitFlags))
 			return false;
-
+		
 		sweepHit.flags = PxHitFlag::eNORMAL;
 		
 		if((hitFlags & PxHitFlag::ePOSITION) && sweepHit.distance!=0.0f)

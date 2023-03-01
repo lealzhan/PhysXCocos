@@ -26,6 +26,7 @@
 // Copyright (c) 2008-2019 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
+#include <stdio.h>
 
 #include "common/PxProfileZone.h"
 #include "geometry/PxSphereGeometry.h"
@@ -960,6 +961,9 @@ void Cct::findTouchedGeometry(
 	sceneQueryFilterData.flags |= PxQueryFlag::eNO_BLOCK; // fix for DE8255
 	scene->overlap(PxBoxGeometry(extents), PxTransform(center), hitBuffer, sceneQueryFilterData, filter.mFilterCallback);
 	PxU32 numberHits = hitBuffer.getNbAnyHits();
+
+	//printf("findTouchedGeometry numberHits %d\n", numberHits);
+	
 	for(PxU32 i = 0; i < numberHits; i++)
 	{
 		const PxOverlapHit& hit = hitBuffer.getAnyHit(i);
@@ -968,16 +972,20 @@ void Cct::findTouchedGeometry(
 		if(!shape || !actor)
 			continue;
 
+		//printf("findTouchedGeometry hit shape id-%d type-%d\n", i, shape->getGeometryType());
+
 		// Filtering
 
 		// Discard all CCT shapes, i.e. kinematic actors we created ourselves. We don't need to collide with them since they're surrounded
 		// by the real CCT volume - and collisions with those are handled elsewhere.
 		if(internalData->cctShapeHashSet->contains(shape))
 			continue;
+		//printf("findTouchedGeometry  mark 0\n");
 
 		// Ubi (EA) : Discarding Triggers :
 		if(shape->getFlags() & PxShapeFlag::eTRIGGER_SHAPE)
 			continue;
+		//printf("findTouchedGeometry  mark 1\n");
 
 		// PT: here you might want to disable kinematic objects.
 

@@ -36,6 +36,7 @@
 #include "GuInternal.h"
 #include "PsFoundation.h"
 #include "GuGJKRaycast.h"
+#include <stdio.h>
 
 using namespace physx;
 using namespace Gu;
@@ -45,7 +46,7 @@ using namespace physx::shdfnd::aos;
 bool sweepCapsule_BoxGeom(GU_CAPSULE_SWEEP_FUNC_PARAMS)
 {
 	PX_UNUSED(hitFlags);
-
+	printf("sweepCapsule_BoxGeom\n");
 	using namespace Ps::aos;
 	PX_ASSERT(geom.getType() == PxGeometryType::eBOX);
 	const PxBoxGeometry& boxGeom = static_cast<const PxBoxGeometry&>(geom);

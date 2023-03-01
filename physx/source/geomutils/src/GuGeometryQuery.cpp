@@ -48,6 +48,7 @@
 #include "GuConvexMesh.h"
 #include "GuDistancePointBox.h"
 #include "PsFPU.h"
+#include <stdio.h>
 
 using namespace physx;
 using namespace Gu;
@@ -125,6 +126,8 @@ bool PxGeometryQuery::sweep(const PxVec3& unitDir, const PxReal distance,
 #endif // PX_CHECKED
 
 	const GeomSweepFuncs& sf = gGeomSweepFuncs;
+	//printf("PxGeometryQuery::sweep 0 type:%d pos:%f %f %f\n", geom0.getType(), (double)pose0.p.x, (double)pose0.p.y, (double)pose0.p.z);
+	//printf("PxGeometryQuery::sweep 1 type:%d pos:%f %f %f\n", geom1.getType(), (double)pose1.p.x, (double)pose1.p.y, (double)pose1.p.z);
 
 	switch(geom0.getType())
 	{

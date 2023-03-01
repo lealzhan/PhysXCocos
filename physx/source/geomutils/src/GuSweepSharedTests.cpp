@@ -44,6 +44,7 @@
 #include "GuSweepCapsuleTriangle.h"
 #include "GuInternal.h"
 #include "GuGJKRaycast.h"
+#include <stdio.h>
 
 using namespace physx;
 using namespace Gu;
@@ -480,9 +481,28 @@ bool sweepBox_ConvexGeom(GU_BOX_SWEEP_FUNC_PARAMS)
 
 bool Gu::sweepCapsuleTriangles(GU_SWEEP_TRIANGLES_FUNC_PARAMS(PxCapsuleGeometry))
 {
+	// printf("--------sweepCapsuleTriangles---------\n");
+
+	// printf("pose p %f %f %f\n", double(pose.p.x), double(pose.p.y), double(pose.p.z));
+	// printf("pose q x %f y %f z %f w %f\n", double(pose.q.x), double(pose.q.y), double(pose.q.z), double(pose.q.w));
+
 	Capsule capsule;
 	getCapsule(capsule, geom, pose);
 	capsule.radius +=inflation;
+
+	// printf("--------sweepCapsuleTriangles_Precise---------\n");
+	// printf("nbTris %d\n", nbTris);
+	// printf("triangles->verts0 %f %f %f\n", double(triangles->verts[0].x), double(triangles->verts[0].y), double(triangles->verts[0].z));
+	// printf("triangles->verts1 %f %f %f\n", double(triangles->verts[1].x), double(triangles->verts[1].y), double(triangles->verts[1].z));
+	// printf("triangles->verts2 %f %f %f\n", double(triangles->verts[2].x), double(triangles->verts[2].y), double(triangles->verts[2].z));
+	// printf("capsule rad %f \n", double(capsule.radius));
+	// printf("capsule p0 %f %f %f\n", double(capsule.p0.x), double(capsule.p0.y), double(capsule.p0.z));
+	// printf("capsule p1 %f %f %f\n", double(capsule.p1.x), double(capsule.p1.y), double(capsule.p1.z));
+	// printf("ray unitDir %f %f %f\n", double(unitDir.x), double(unitDir.y), double(unitDir.z));
+	// printf("ray distance %f\n", double(distance));
+	// printf("cachedIndex %d\n", *cachedIndex);
+	// printf("hitFlags %d\n", (PxU16)hitFlags);
+	// printf("doubleSided %d\n", doubleSided);
 
 	// Compute swept box
 	Box capsuleBox;
@@ -492,7 +512,14 @@ bool Gu::sweepCapsuleTriangles(GU_SWEEP_TRIANGLES_FUNC_PARAMS(PxCapsuleGeometry)
 	computeSweptBox(sweptBounds, capsuleBox.extents, capsuleBox.center, capsuleBox.rot, unitDir, distance);
 
 	PxVec3 triNormal;
-	return sweepCapsuleTriangles_Precise(nbTris, triangles, capsule, unitDir, distance, cachedIndex, hit, triNormal, hitFlags, doubleSided, &sweptBounds);
+	bool ret = sweepCapsuleTriangles_Precise(nbTris, triangles, capsule, unitDir, distance, cachedIndex, hit, triNormal, hitFlags, doubleSided, &sweptBounds);
+	// printf("ret %d\n", ret);
+	// printf("hit pos %f %f %f\n", double(hit.position.x), double(hit.position.y), double(hit.position.z));
+	// printf("hit normal %f %f %f\n", double(hit.normal.x), double(hit.normal.y), double(hit.normal.z));
+	// printf("hit distance %f\n", double(hit.distance));
+
+	// printf("--------sweepCapsuleTriangles_Precise END---------\n");
+	return ret;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////

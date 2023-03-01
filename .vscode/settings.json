@@ -7,6 +7,19 @@
         "map": "cpp",
         "set": "cpp",
         "unordered_map": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "type_traits": "cpp",
+        "xutility": "cpp",
+        "ios": "cpp",
+        "iosfwd": "cpp",
+        "memory": "cpp",
+        "ratio": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "xmemory0": "cpp",
+        "xtr1common": "cpp",
+        "sstream": "cpp",
+        "queue": "cpp",
+        "xstring": "cpp"
     }
 }

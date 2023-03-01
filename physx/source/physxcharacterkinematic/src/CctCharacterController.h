@@ -41,6 +41,7 @@
 #include "PsArray.h"
 #include "PsHashSet.h"
 #include "CmPhysXCommon.h"
+#include <stdio.h>
 
 namespace physx
 {
@@ -244,10 +245,15 @@ namespace Cct
 		TouchedGeom*		mGeom;
 
 		PX_FORCE_INLINE		void	setWorldPos(const PxVec3& localImpact, const PxExtendedVec3& offset)
+		//PX_FORCE_INLINE		void	setWorldPos(PxVec3 localImpact, PxExtendedVec3 offset)
 		{
 			mWorldPos.x = PxExtended(localImpact.x) + offset.x;
 			mWorldPos.y = PxExtended(localImpact.y) + offset.y;
 			mWorldPos.z = PxExtended(localImpact.z) + offset.z;
+
+			//printf("sweepHit.position localImpact %f %f %f\n", double(localImpact.x), double(localImpact.y), double(localImpact.z));
+			//printf("touchedMesh->mOffset offset %f %f %f\n", double(offset.x), double(offset.y), double(offset.z));
+			//printf("mWorldPos %f %f %f\n", double(mWorldPos.x), double(mWorldPos.y), double(mWorldPos.z));
 		}
 	};
 
