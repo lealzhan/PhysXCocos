@@ -5,7 +5,7 @@ now=`date +'%Y-%m-%d %H:%M:%S'`
 start_time=$(date --date="$now" +%s)
 
 base_dir=$(cd "$(dirname "$0")";pwd)
-mode="debug"
+mode="release"
 if [ $1 ]; then mode=$1; fi
 
 echo "--------|||  BUILD JS  |||--------"
